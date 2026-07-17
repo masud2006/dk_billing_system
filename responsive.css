@@ -1,0 +1,366 @@
+/* ============================================================
+   responsive.css — All Media Queries
+   ============================================================ */
+
+/* ----- small phones (portrait) ----- */
+@media (max-width: 400px) {
+    body {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 20px 14px 24px;
+    }
+
+    .card--landing {
+        padding: 24px 14px 28px;
+    }
+
+    .card__title {
+        font-size: 1.4rem;
+    }
+
+    .card__subtitle {
+        font-size: 0.9rem;
+    }
+
+    .order-input {
+        font-size: 0.95rem;
+        padding: 14px;
+        min-height: 140px;
+    }
+
+    .btn {
+        font-size: 0.95rem;
+        padding: 12px 20px;
+        min-height: 50px;
+    }
+
+    .btn--large {
+        font-size: 1.05rem;
+        padding: 14px 24px;
+        min-height: 58px;
+    }
+
+    .invoice-mini {
+        padding: 14px 12px 18px;
+        font-size: 0.8rem;
+    }
+
+    .invoice-mini .invoice__brand-name {
+        font-size: 1.1rem;
+    }
+
+    .invoice-mini .invoice__logo {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+
+    .invoice-mini .invoice__customer {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+    }
+
+    .invoice-mini .invoice__table {
+        font-size: 0.72rem;
+    }
+
+    .invoice-mini .invoice__table .col-price {
+        width: 50px;
+    }
+    .invoice-mini .invoice__table .col-total {
+        width: 56px;
+    }
+
+    .invoice-mini .invoice__summary-row--grand {
+        font-size: 1rem;
+    }
+
+    .modal {
+        padding: 10px;
+    }
+
+    .modal__content {
+        max-height: 98vh;
+        border-radius: var(--radius-sm);
+    }
+
+    .modal__header {
+        padding: 14px 16px 10px;
+    }
+
+    .modal__body {
+        padding: 16px 16px 24px;
+    }
+
+    .invoice-full {
+        font-size: 0.8rem;
+    }
+
+    .invoice-full .invoice__brand-name {
+        font-size: 1.4rem;
+    }
+
+    .invoice-full .invoice__logo {
+        width: 56px;
+        height: 56px;
+        font-size: 1.4rem;
+    }
+
+    .invoice-full .invoice__customer-grid {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        font-size: 0.8rem;
+        padding: 10px 14px;
+    }
+
+    .invoice-full .invoice__table {
+        font-size: 0.76rem;
+    }
+
+    .invoice-full .invoice__table .col-price {
+        width: 60px;
+    }
+    .invoice-full .invoice__table .col-total {
+        width: 68px;
+    }
+
+    .invoice-full .invoice__summary-row--grand {
+        font-size: 1rem;
+    }
+
+    .invoice-preview__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .invoice-preview__actions {
+        justify-content: stretch;
+    }
+
+    .invoice-preview__actions .btn {
+        flex: 1;
+    }
+
+    .error-box {
+        font-size: 0.85rem;
+        padding: 12px 14px;
+    }
+}
+
+/* ----- phones (landscape) & small tablets ----- */
+@media (min-width: 401px) and (max-width: 600px) {
+    body {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 24px 18px 28px;
+    }
+
+    .card__title {
+        font-size: 1.5rem;
+    }
+
+    .invoice-mini .invoice__customer {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .modal__body {
+        padding: 18px 18px 28px;
+    }
+
+    .invoice-full .invoice__customer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ----- tablets & small desktops ----- */
+@media (min-width: 601px) and (max-width: 900px) {
+    body {
+        padding: 20px;
+    }
+
+    .card {
+        padding: 32px 32px 36px;
+    }
+
+    .card__title {
+        font-size: 1.8rem;
+    }
+
+    .invoice-mini .invoice__customer {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .invoice-full .invoice__customer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ----- large desktops ----- */
+@media (min-width: 901px) {
+    body {
+        padding: 32px;
+    }
+
+    .card {
+        padding: 40px 40px 44px;
+    }
+
+    .card__title {
+        font-size: 2rem;
+    }
+
+    .card--landing {
+        padding: 44px 40px 48px;
+    }
+
+    .order-input {
+        min-height: 200px;
+        font-size: 1.05rem;
+    }
+
+    .invoice-mini .invoice__customer {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .invoice-full .invoice__customer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .invoice-preview__actions .btn {
+        min-width: 140px;
+    }
+}
+
+/* ----- print styles (critical for PDF export) ----- */
+@media print {
+    body {
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+
+    .app,
+    .landing,
+    .invoice-preview,
+    .invoice-preview__header,
+    .invoice-preview__actions,
+    .card__actions,
+    .error-box,
+    .order-input,
+    #createBtn,
+    #viewInvoiceBtn,
+    #downloadBtn,
+    .modal__header,
+    .modal__close,
+    #modalDownloadBtn,
+    .invoice-preview__title {
+        display: none !important;
+    }
+
+    .modal {
+        position: static !important;
+        background: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding: 0 !important;
+        animation: none !important;
+        display: block !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+    }
+
+    .modal.hidden {
+        display: block !important;
+    }
+
+    .modal__content {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        display: block !important;
+        padding: 0.4in !important;
+        background: #fff !important;
+        animation: none !important;
+    }
+
+    .modal__body {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .modal__overlay {
+        display: none !important;
+    }
+
+    .invoice-full {
+        max-width: 100% !important;
+        font-size: 10pt !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .invoice-full .invoice__brand-name {
+        font-size: 18pt !important;
+    }
+
+    .invoice-full .invoice__table {
+        font-size: 9pt !important;
+    }
+
+    .invoice-full .invoice__table th {
+        border-bottom: 2px solid #222 !important;
+    }
+
+    .invoice-full .invoice__table td {
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    .invoice-full .invoice__summary-row--grand {
+        font-size: 12pt !important;
+        border-top: 3px solid #D62828 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .invoice-full .invoice__customer-grid {
+        background: #f4f4f4 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .invoice-full .invoice__logo {
+        background: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .invoice-full .invoice__header {
+        border-bottom: 3px solid #D62828 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .invoice-full .invoice__summary-row--grand .value {
+        color: #D62828 !important;
+    }
+
+    /* A4 page break / margins */
+    .invoice-full {
+        page-break-after: avoid;
+    }
+
+    /* ensure no extra spacing */
+    .modal__content {
+        padding: 0.3in 0.4in !important;
+    }
+}

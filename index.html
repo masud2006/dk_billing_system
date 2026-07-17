@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Deshi Kitchen · Invoice Generator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+
+    <!-- ============================================================
+    LANDING PAGE
+    ============================================================ -->
+    <main id="app" class="app">
+
+        <!-- Landing Card -->
+        <section id="landing" class="landing">
+            <div class="card card--landing">
+                <div class="card__badge">🍽️</div>
+                <h1 class="card__title">Automatic Invoice Generator</h1>
+                <p class="card__subtitle">Paste the order details below.</p>
+
+                <textarea id="orderInput" class="order-input" placeholder="Paste your order details here…" spellcheck="false" rows="12"></textarea>
+
+                <div class="card__actions">
+                    <button id="createBtn" class="btn btn--primary btn--large">
+                        <span class="btn__text">Create Invoice</span>
+                        <span class="btn__spinner hidden"></span>
+                    </button>
+                </div>
+
+                <div id="errorBox" class="error-box hidden" role="alert"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        INVOICE PREVIEW (shown after generation)
+        ============================================================ -->
+        <section id="invoicePreview" class="invoice-preview hidden">
+            <div class="invoice-preview__header">
+                <h2 class="invoice-preview__title">🧾 Invoice</h2>
+                <div class="invoice-preview__actions">
+                    <button id="viewInvoiceBtn" class="btn btn--secondary">View Invoice</button>
+                    <button id="downloadBtn" class="btn btn--primary">Download Invoice</button>
+                </div>
+            </div>
+            <div id="invoiceMini" class="invoice-mini">
+                <!-- mini invoice preview rendered by JS -->
+            </div>
+        </section>
+
+        <!-- ============================================================
+        INVOICE MODAL (full A4 view)
+        ============================================================ -->
+        <div id="invoiceModal" class="modal hidden" role="dialog" aria-modal="true">
+            <div class="modal__overlay" id="modalOverlay"></div>
+            <div class="modal__content">
+                <div class="modal__header">
+                    <button id="modalCloseBtn" class="modal__close" aria-label="Close invoice">✕</button>
+                    <button id="modalDownloadBtn" class="btn btn--primary btn--sm">Download PDF</button>
+                </div>
+                <div class="modal__body" id="modalBody">
+                    <!-- full invoice rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="script.js"></script>
+</body>
+</html>
