@@ -1,5 +1,6 @@
 /* ============================================================
    script.js — Automatic Restaurant Invoice Generator
+   with One‑Click PDF Download (full content)
    ============================================================ */
 
 (function () {
@@ -105,6 +106,21 @@
         }
     }
 
+    function setDownloadLoading(isLoading) {
+        const btns = [downloadBtn, modalDownloadBtn];
+        btns.forEach(btn => {
+            if (btn) {
+                if (isLoading) {
+                    btn.disabled = true;
+                    btn.textContent = 'Generating PDF…';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Download Invoice';
+                }
+            }
+        });
+    }
+
     // ---- parse input ----
     function parseInput(text) {
         const lines = text.split(/\r?\n/).map((l) => l.trim());
@@ -114,7 +130,6 @@
             throw new Error('No order details found. Please paste the order text.');
         }
 
-        // ---- find "Order items" section ----
         let itemsStartIdx = -1;
         for (let i = 0; i < nonEmptyLines.length; i++) {
             if (/^Order items/i.test(nonEmptyLines[i])) {
@@ -122,7 +137,6 @@
                 break;
             }
         }
-
         if (itemsStartIdx === -1) {
             for (let i = 0; i < nonEmptyLines.length; i++) {
                 if (/^[•·*]\s*/.test(nonEmptyLines[i])) {
@@ -132,7 +146,6 @@
             }
         }
 
-        // ---- header fields ----
         const headerFields = [
             { key: 'name', label: 'Name' },
             { key: 'phone', label: 'Phone' },
@@ -174,7 +187,6 @@
             }
         }
 
-        // ---- extract items ----
         const items = [];
         let itemsEndIdx = nonEmptyLines.length;
         for (let i = itemsStartIdx + 1; i < nonEmptyLines.length; i++) {
@@ -216,7 +228,6 @@
             throw new Error('No order items found. Please make sure items are listed as: • Item × Qty = ৳Price');
         }
 
-        // ---- extract totals ----
         let subtotal = 0;
         let deliveryFee = 0;
         let grandTotal = 0;
@@ -315,7 +326,7 @@
         return String(text).replace(/[&<>"']/g, function (m) { return map[m]; });
     }
 
-    // ---- build full invoice HTML (returns string) ----
+    // ---- build full invoice HTML (string) ----
     function buildFullInvoiceHTML(data) {
         const items = data.items;
         let tableRows = '';
@@ -334,7 +345,7 @@
         }
 
         return `
-            <div class="invoice-full">
+            <div class="invoice-full" id="invoiceFullContent">
                 <div class="invoice__header">
                     <div class="invoice__brand">
                         <div class="invoice__brand-name">${RESTAURANT.name}</div>
@@ -530,21 +541,99 @@
         document.body.style.overflow = '';
     }
 
-    // ---- download invoice (NEW: opens new window) ----
+    // ---- ONE-CLICK PDF DOWNLOAD (fixed: blank-page issue) ----
     function downloadInvoice() {
-        if (!currentInvoiceData) return;
+        if (!currentInvoiceData) {
+            alert('Please generate an invoice first.');
+            return;
+        }
 
-        // Build the full invoice HTML
+        setDownloadLoading(true);
+
         const invoiceHTML = buildFullInvoiceHTML(currentInvoiceData);
 
-        // Open a new window
+        // Create a temporary container with A4 dimensions and full content.
+        // IMPORTANT: do NOT use a negative left/top offset (e.g. left:-9999px).
+        // html2canvas clips/ignores content placed at negative coordinates,
+        // which is exactly what was causing the downloaded PDF to be blank.
+        // Instead we keep it "on-screen" at (0,0) but push it behind everything
+        // else with a very low z-index so it's invisible to the user.
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'fixed';
+        tempContainer.style.left = '0';
+        tempContainer.style.top = '0';
+        tempContainer.style.zIndex = '-9999';
+        tempContainer.style.width = '210mm';
+        tempContainer.style.minHeight = '297mm';
+        tempContainer.style.padding = '10mm';
+        tempContainer.style.background = '#ffffff';
+        tempContainer.style.boxSizing = 'border-box';
+        tempContainer.style.overflow = 'visible';
+        tempContainer.innerHTML = invoiceHTML;
+        document.body.appendChild(tempContainer);
+
+        // Force reflow to ensure all content is rendered
+        tempContainer.offsetHeight;
+
+        // Wait for images and styles to apply
+        setTimeout(function () {
+            const opt = {
+                margin: 0,
+                filename: `Invoice-${currentInvoiceData.customer.name}-${getTodayStr()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    backgroundColor: '#ffffff',
+                    x: 0,
+                    y: 0,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: tempContainer.scrollWidth,
+                    height: tempContainer.scrollHeight,
+                    windowWidth: tempContainer.scrollWidth,
+                    windowHeight: tempContainer.scrollHeight,
+                    logging: false,
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    compress: true,
+                },
+                pagebreak: { mode: ['auto', 'css', 'legacy'] }
+            };
+
+            html2pdf()
+                .set(opt)
+                .from(tempContainer)
+                .save()
+                .then(function () {
+                    document.body.removeChild(tempContainer);
+                    setDownloadLoading(false);
+                })
+                .catch(function (err) {
+                    document.body.removeChild(tempContainer);
+                    console.error('PDF generation failed:', err);
+                    alert('Failed to generate PDF. Please try again.');
+                    setDownloadLoading(false);
+                });
+        }, 600);
+    }
+
+    // ---- fallback: print-to-PDF (kept as backup) ----
+    function downloadInvoicePrint() {
+        if (!currentInvoiceData) return;
+
+        const invoiceHTML = buildFullInvoiceHTML(currentInvoiceData);
+
         const win = window.open('', '_blank', 'width=800,height=600');
         if (!win) {
             alert('Please allow pop-ups to download the invoice.');
             return;
         }
 
-        // Write the complete document with styles
         win.document.write(`
             <!DOCTYPE html>
             <html>
@@ -554,7 +643,6 @@
                 <link rel="stylesheet" href="style.css">
                 <link rel="stylesheet" href="responsive.css">
                 <style>
-                    /* ensure the body has no margins for print */
                     body { margin: 0; padding: 20px; background: white; }
                     .invoice-full { max-width: 800px; margin: 0 auto; }
                 </style>
@@ -562,7 +650,6 @@
             <body>
                 ${invoiceHTML}
                 <script>
-                    // Trigger print after the window fully loads
                     window.onload = function() {
                         window.print();
                     };
@@ -592,10 +679,7 @@
 
     modalOverlay.addEventListener('click', closeModal);
 
-    modalDownloadBtn.addEventListener('click', function () {
-        // Reuse the download function for consistency
-        downloadInvoice();
-    });
+    modalDownloadBtn.addEventListener('click', downloadInvoice);
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
@@ -608,5 +692,5 @@
     invoicePreview.classList.add('hidden');
     modal.classList.add('hidden');
 
-    console.log('🍽️ Deshi Kitchen Invoice Generator ready.');
+    console.log('🍽️ Deshi Kitchen Invoice Generator ready (one-click PDF).');
 })();
