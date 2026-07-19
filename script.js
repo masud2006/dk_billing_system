@@ -26,6 +26,7 @@
         website: 'www.deshi-kitchen.com',
         phone: '+8801614362939',
         email: 'customer@deshi-kitchen.com',
+        logo: 'logo2.png',
     };
 
     // ---- state ----
@@ -356,7 +357,7 @@
                         </div>
                     </div>
                     <div class="invoice__logo" id="restaurantLogo">
-                    <img src="logo2.png" alt="Deshi Kitchen Logo">
+                        <img src="${RESTAURANT.logo}" alt="Deshi Kitchen logo" crossorigin="anonymous" />
                     </div>
                 </div>
 
@@ -442,7 +443,7 @@
                     </div>
                 </div>
                 <div class="invoice__logo" id="restaurantLogo">
-                <img src="logo2.png" alt="Deshi Kitchen Logo">
+                    <img src="${RESTAURANT.logo}" alt="Deshi Kitchen logo" crossorigin="anonymous" />
                 </div>
             </div>
             <div class="invoice__meta">
@@ -541,7 +542,7 @@
         document.body.style.overflow = '';
     }
 
-    // ---- ONE-CLICK PDF DOWNLOAD (fixed: blank-page issue) ----
+    // ---- ONE-CLICK PDF DOWNLOAD (fixed: blank-page issue + mobile speed) ----
     function downloadInvoice() {
         if (!currentInvoiceData) {
             alert('Please generate an invoice first.');
@@ -550,12 +551,16 @@
 
         setDownloadLoading(true);
 
+        // Detect mobile so we can trade a little image sharpness for speed.
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+            (window.innerWidth <= 768);
+
         const invoiceHTML = buildFullInvoiceHTML(currentInvoiceData);
 
         // Create a temporary container with A4 dimensions and full content.
         // IMPORTANT: do NOT use a negative left/top offset (e.g. left:-9999px).
         // html2canvas clips/ignores content placed at negative coordinates,
-        // which is exactly what was causing the downloaded PDF to be blank.
+        // which previously caused the downloaded PDF to be blank.
         // Instead we keep it "on-screen" at (0,0) but push it behind everything
         // else with a very low z-index so it's invisible to the user.
         const tempContainer = document.createElement('div');
@@ -572,54 +577,58 @@
         tempContainer.innerHTML = invoiceHTML;
         document.body.appendChild(tempContainer);
 
-        // Force reflow to ensure all content is rendered
+        // Force reflow to ensure all content is laid out
         tempContainer.offsetHeight;
 
-        // Wait for images and styles to apply
-        setTimeout(function () {
-            const opt = {
-                margin: 0,
-                filename: `Invoice-${currentInvoiceData.customer.name}-${getTodayStr()}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    letterRendering: true,
-                    backgroundColor: '#ffffff',
-                    x: 0,
-                    y: 0,
-                    scrollX: 0,
-                    scrollY: 0,
-                    width: tempContainer.scrollWidth,
-                    height: tempContainer.scrollHeight,
-                    windowWidth: tempContainer.scrollWidth,
-                    windowHeight: tempContainer.scrollHeight,
-                    logging: false,
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait',
-                    compress: true,
-                },
-                pagebreak: { mode: ['auto', 'css', 'legacy'] }
-            };
+        // Wait for the browser to actually paint (2 animation frames) instead
+        // of a flat, device-agnostic setTimeout delay — faster on capable
+        // devices, still reliable on slow ones.
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                const opt = {
+                    margin: 0,
+                    filename: `Invoice-${currentInvoiceData.customer.name}-${getTodayStr()}.pdf`,
+                    image: { type: 'jpeg', quality: isMobile ? 0.92 : 0.98 },
+                    html2canvas: {
+                        scale: isMobile ? 1.5 : 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        backgroundColor: '#ffffff',
+                        x: 0,
+                        y: 0,
+                        scrollX: 0,
+                        scrollY: 0,
+                        width: tempContainer.scrollWidth,
+                        height: tempContainer.scrollHeight,
+                        windowWidth: tempContainer.scrollWidth,
+                        windowHeight: tempContainer.scrollHeight,
+                        logging: false,
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait',
+                        compress: true,
+                    },
+                    pagebreak: { mode: ['auto', 'css', 'legacy'] }
+                };
 
-            html2pdf()
-                .set(opt)
-                .from(tempContainer)
-                .save()
-                .then(function () {
-                    document.body.removeChild(tempContainer);
-                    setDownloadLoading(false);
-                })
-                .catch(function (err) {
-                    document.body.removeChild(tempContainer);
-                    console.error('PDF generation failed:', err);
-                    alert('Failed to generate PDF. Please try again.');
-                    setDownloadLoading(false);
-                });
-        }, 600);
+                html2pdf()
+                    .set(opt)
+                    .from(tempContainer)
+                    .save()
+                    .then(function () {
+                        document.body.removeChild(tempContainer);
+                        setDownloadLoading(false);
+                    })
+                    .catch(function (err) {
+                        document.body.removeChild(tempContainer);
+                        console.error('PDF generation failed:', err);
+                        alert('Failed to generate PDF. Please try again.');
+                        setDownloadLoading(false);
+                    });
+            });
+        });
     }
 
     // ---- fallback: print-to-PDF (kept as backup) ----
